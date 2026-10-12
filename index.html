@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JD: A Little Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0a0816; --ink:#fbf7ff; --muted:#bfb6d6; --lav:#cdb8ff; --gold:#ffd9a0; --line:rgba(205,184,255,.22); --glass:rgba(255,255,255,.055); --mood:#a98aff; --serif:Fraunces,Georgia,"Times New Roman",serif; --sans:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; color:var(--ink); font-family:var(--sans); line-height:1.65; background:radial-gradient(ellipse 70% 50% at 12% 0%,#2f1f52 0,transparent 70%),radial-gradient(ellipse 60% 45% at 95% 40%,#1b2350 0,transparent 70%),var(--bg); background-attachment:fixed; overflow-x:hidden; }
+  #sky { position:fixed; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+  .shoot { position:fixed; width:160px; height:2px; background:linear-gradient(90deg,transparent,#fff); border-radius:2px; transform:rotate(28deg); opacity:0; z-index:5; pointer-events:none; animation:shoot 1.3s ease-out forwards; }
+  @keyframes shoot { 0%{opacity:0; translate:0 0} 15%{opacity:1} 100%{opacity:0; translate:420px 230px} }
+  a { color:inherit; }
+  :focus-visible { outline:2px solid var(--gold); outline-offset:3px; border-radius:6px; }
+  .wrap { width:min(1080px,92%); margin:auto; }
+  nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:22px 0; }
+  .brand { font-family:var(--serif); font-weight:700; font-size:1.1rem; color:var(--lav); text-decoration:none; }
+  nav ul { display:flex; gap:22px; list-style:none; margin:0; padding:0; }
+  nav ul a { color:var(--muted); text-decoration:none; font-size:.92rem; padding:4px 0; border-bottom:1px solid transparent; transition:color .2s,border-color .2s; }
+  nav ul a:hover { color:var(--ink); border-color:var(--lav); }
+
+  .hero { display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center; padding:56px 0 70px; }
+  .tag { display:inline-block; font-size:.85rem; color:var(--lav); border:1px solid var(--line); background:var(--glass); padding:6px 14px; border-radius:999px; }
+  h1 { font-family:var(--serif); font-weight:500; font-size:clamp(2.7rem,7vw,5.2rem); line-height:1.02; letter-spacing:-.03em; margin:22px 0 20px; }
+  h1 em { font-style:italic; color:var(--gold); }
+  .lead { color:var(--muted); max-width:46ch; font-size:1.05rem; margin:0; }
+  .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; }
+  .btn { font:inherit; font-weight:700; font-size:.95rem; border-radius:999px; padding:13px 22px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; border:1px solid var(--line); color:var(--ink); background:var(--glass); transition:transform .2s,background .2s; }
+  .btn:hover { transform:translateY(-2px); background:rgba(255,255,255,.1); }
+  .btn.primary { color:#150f26; border:0; background:linear-gradient(110deg,#f3eaff,#b99aff); }
+
+  .constellation { width:100%; height:auto; overflow:visible; }
+  .arc { fill:none; stroke:var(--lav); stroke-width:1.5; stroke-dasharray:4 7; stroke-linecap:round; opacity:.75; }
+  .arc-draw { stroke-dasharray:420; stroke-dashoffset:420; animation:draw 2.4s .4s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .star-node { cursor:pointer; }
+  .star-node .core { fill:var(--gold); }
+  .star-node.two .core { fill:var(--lav); }
+  .star-node .halo { fill:currentColor; opacity:.18; transition:opacity .25s,transform .25s; transform-box:fill-box; transform-origin:center; }
+  .star-node:hover .halo,.star-node:focus-visible .halo { opacity:.38; transform:scale(1.25); }
+  .star-node.one { color:var(--gold); } .star-node.two { color:var(--lav); }
+  .node-label { font-family:var(--serif); font-size:20px; fill:var(--ink); }
+
+  section { padding:54px 0; }
+  h2 { font-family:var(--serif); font-weight:500; font-size:clamp(1.9rem,4.2vw,2.8rem); letter-spacing:-.02em; line-height:1.1; margin:0 0 12px; }
+  .sub { color:var(--muted); max-width:54ch; margin:0 0 34px; }
+
+  .stars-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+  .person:nth-child(2) { margin-top:56px; }
+  .photo { position:relative; aspect-ratio:3/4; border-radius:999px 999px 28px 28px; overflow:hidden; border:1px solid var(--line); background:linear-gradient(160deg,#35245a,#131027); }
+  .photo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; transition:transform .6s ease; }
+  .person:hover .photo img { transform:scale(1.04); }
+  .photo .fallback { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:24px; color:var(--muted); font-size:.85rem; }
+  .photo.missing .fallback { display:flex; }
+  .fallback b { font-family:var(--serif); font-size:4.2rem; font-weight:500; color:var(--lav); line-height:1; }
+  .person h3 { font-family:var(--serif); font-weight:500; font-size:1.7rem; margin:20px 0 6px; }
+  .person p { margin:0; color:var(--muted); max-width:40ch; }
+
+  .notes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .note { font:inherit; text-align:left; color:var(--ink); background:var(--glass); border:1px solid var(--line); border-radius:20px; padding:22px; cursor:pointer; transition:background .25s,border-color .25s; display:flex; flex-direction:column; gap:8px; }
+  .note:hover { border-color:rgba(205,184,255,.5); }
+  .note .emoji { font-size:1.5rem; line-height:1; }
+  .note h3 { margin:0; font-family:var(--serif); font-weight:500; font-size:1.2rem; }
+  .note .hint { color:var(--muted); font-size:.88rem; }
+  .note .msg { display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; }
+  .note .msg > span { overflow:hidden; color:var(--gold); }
+  .note[aria-expanded="true"] { background:rgba(205,184,255,.12); border-color:var(--lav); }
+  .note[aria-expanded="true"] .msg { grid-template-rows:1fr; }
+  .note[aria-expanded="true"] .hint { display:none; }
+
+  .quiz-box { border:1px solid var(--line); border-radius:28px; padding:clamp(24px,5vw,44px); background:var(--glass); display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:center; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .choices button { font:inherit; color:var(--ink); background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:16px; padding:16px 12px; cursor:pointer; transition:border-color .2s,background .2s; }
+  .choices button:hover { border-color:var(--lav); }
+  .choices button[aria-pressed="true"] { border-color:var(--mood); background:color-mix(in srgb,var(--mood) 25%,transparent); }
+  .result { min-height:150px; border-radius:20px; padding:24px; border:1px dashed var(--mood); display:flex; flex-direction:column; justify-content:center; gap:6px; transition:border-color .4s; }
+  .result .big { font-size:2rem; line-height:1; }
+  .result p { margin:0; font-family:var(--serif); font-size:1.25rem; line-height:1.4; }
+
+  footer { border-top:1px solid var(--line); margin-top:30px; padding:28px 0 40px; color:var(--muted); font-size:.85rem; }
+  footer small { display:block; margin-top:6px; opacity:.85; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#f3eaff; color:#1a1230; padding:12px 20px; border-radius:999px; font-weight:700; box-shadow:0 8px 35px #0008; transition:.25s; text-align:center; width:max-content; max-width:90%; z-index:10; }
+  .toast.show { opacity:1; transform:translate(-50%,0); }
+
+  @media(max-width:760px) {
+    nav ul { gap:14px; } nav ul a { font-size:.82rem; }
+    .hero,.stars-grid,.quiz-box { grid-template-columns:1fr; }
+    .hero { padding-top:30px; } .constellation { max-width:380px; margin:auto; }
+    .person:nth-child(2) { margin-top:0; }
+    .notes { grid-template-columns:1fr; }
+  }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } .arc-draw { stroke-dashoffset:0; } html { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#top">JD: A Little Universe</a>
+    <ul><li><a href="#universe">The two stars</a></li><li><a href="#moments">Little notes</a></li><li><a href="#quiz">Mood quiz</a></li></ul>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <span class="tag">A fan-made coding project</span>
+      <h1>Some stars are far away. <em>Some feel close.</em></h1>
+      <p class="lead">A tiny digital universe inspired by the joy JoongDunk bring to their fans, made with HTML, CSS and JavaScript.</p>
+      <div class="actions">
+        <a class="btn primary" href="#universe">Explore the universe</a>
+        <button class="btn" id="wish-btn" type="button">Make a wish</button>
+      </div>
+    </div>
+    <svg class="constellation" viewBox="0 0 420 360" role="img" aria-label="Two stars joined by a glowing line">
+      <path class="arc" d="M120 250 Q 190 80 310 110" opacity=".25"/>
+      <path class="arc arc-draw" d="M120 250 Q 190 80 310 110"/>
+      <g fill="#fff" opacity=".6"><circle cx="40" cy="60" r="1.6"/><circle cx="380" cy="230" r="1.6"/><circle cx="230" cy="310" r="1.3"/><circle cx="70" cy="170" r="1.2"/><circle cx="350" cy="40" r="1.4"/></g>
+      <a href="#joong" class="star-node one" aria-label="Joong Archen">
+        <circle class="halo" cx="120" cy="250" r="38"/>
+        <path class="core" d="M120 224 L127 243 L146 250 L127 257 L120 276 L113 257 L94 250 L113 243 Z"/>
+        <text class="node-label" x="120" y="308" text-anchor="middle">Joong</text>
+      </a>
+      <a href="#dunk" class="star-node two" aria-label="Dunk Natachai">
+        <circle class="halo" cx="310" cy="110" r="38"/>
+        <path class="core" d="M310 84 L317 103 L336 110 L317 117 L310 136 L303 117 L284 110 L303 103 Z"/>
+        <text class="node-label" x="310" y="168" text-anchor="middle">Dunk</text>
+      </a>
+    </svg>
+  </header>
+
+  <main>
+    <section id="universe">
+      <h2>A little space for appreciation</h2>
+      <p class="sub">A creative fan tribute, not an official page. It celebrates the people whose work makes fans smile.</p>
+      <div class="stars-grid">
+        <article class="person" id="joong">
+          <div class="photo"><img src="joong.jpeg" alt="Joong Archen"><div class="fallback"><b>J</b><span>Add your photo as <strong>joong.jpg</strong><br>next to this HTML file</span></div></div>
+          <h3>Joong Archen</h3>
+          <p>For the charisma, the energy, and all the moments fans love to revisit.</p>
+        </article>
+        <article class="person" id="dunk">
+          <div class="photo"><img src="dunk.jpeg" alt="Dunk Natachai"><div class="fallback"><b>D</b><span>Add your photo as <strong>dunk.jpg</strong><br>next to this HTML file</span></div></div>
+          <h3>Dunk Natachai</h3>
+          <p>For the charm, the talent, and the joy that travels from the screen to the fandom.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="moments">
+      <h2>Little notes, little magic</h2>
+      <p class="sub">Tap a note to open it.</p>
+      <div class="notes">
+        <button class="note" type="button" aria-expanded="false"><span class="emoji">🌟</span><h3>A little reminder</h3><span class="hint">Tap to open</span><span class="msg"><span>Keep creating things that make you happy. ✨</span></span></button>
+        <button class="note" type="button" aria-expanded="false"><span class="emoji">💜</span><h3>A little encouragement</h3><span class="hint">Tap to open</span><span class="msg"><span>Let your fandom inspire you, and let your own style shine too.</span></span></button>
+        <button class="note" type="button" aria-expanded="false"><span class="emoji">🌙</span><h3>A little thank-you</h3><span class="hint">Tap to open</span><span class="msg"><span>Made with code, shared with kindness.</span></span></button>
+      </div>
+    </section>
+
+    <section id="quiz">
+      <div class="quiz-box">
+        <div>
+          <h2>Choose your universe mood</h2>
+          <p class="sub" style="margin-bottom:22px">Pick the vibe that matches your day.</p>
+          <div class="choices" role="group" aria-label="Mood choices">
+            <button type="button" data-mood="cosmic" aria-pressed="false">🌌 Cosmic and dreamy</button>
+            <button type="button" data-mood="soft" aria-pressed="false">☁️ Soft and cozy</button>
+            <button type="button" data-mood="sparkly" aria-pressed="false">✨ Sparkly and playful</button>
+            <button type="button" data-mood="creative" aria-pressed="false">🧑‍💻 Creative coder</button>
+          </div>
+        </div>
+        <div class="result" aria-live="polite"><span class="big" id="r-emoji">✦</span><p id="r-text">Pick a mood and your message appears here.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Made with HTML, CSS and JavaScript by a fan who loves to code. 💜
+    <small>Unofficial fan-made project. Not affiliated with Joong, Dunk, GMMTV, or their representatives.</small>
+    <small>Use photos you have permission to use, and credit the original source where appropriate.</small>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Starfield with gentle mouse parallax
+  const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
+  let stars = [], W, H, mx = 0, my = 0;
+  function resize() {
+    const d = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+    cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    stars = Array.from({ length: Math.round(W * H / 11000) + 40 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.4 + .3, z: Math.random() * .9 + .1, p: Math.random() * 6.28 }));
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      const a = reduce ? .6 : .35 + .5 * Math.abs(Math.sin(t / 1400 + s.p));
+      ctx.globalAlpha = a; ctx.fillStyle = s.z > .7 ? '#ffe9c4' : '#fff';
+      ctx.beginPath(); ctx.arc(s.x + mx * s.z * 14, s.y + my * s.z * 14, s.r, 0, 6.28); ctx.fill();
+    }
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  addEventListener('resize', () => { resize(); if (reduce) draw(0); });
+  addEventListener('pointermove', e => { mx = e.clientX / W - .5; my = e.clientY / H - .5; });
+  resize(); requestAnimationFrame(draw);
+
+  // Toast and shooting star
+  const toast = document.getElementById('toast'); let tt;
+  function showToast(m) { toast.textContent = m; toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('show'), 3200); }
+  function shoot() {
+    if (reduce) return;
+    const s = document.createElement('div'); s.className = 'shoot';
+    s.style.left = (Math.random() * 40 + 5) + '%'; s.style.top = (Math.random() * 25 + 5) + '%';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1400);
+  }
+  document.getElementById('wish-btn').addEventListener('click', () => {
+    shoot(); showToast('May your days be kind and your dreams stay bright. ✨');
+  });
+
+  // Notes: open one at a time
+  const notes = document.querySelectorAll('.note');
+  notes.forEach(n => n.addEventListener('click', () => {
+    const open = n.getAttribute('aria-expanded') === 'true';
+    notes.forEach(o => o.setAttribute('aria-expanded', 'false'));
+    n.setAttribute('aria-expanded', String(!open));
+  }));
+
+  // Photos: show a monogram placeholder if the image is missing
+  document.querySelectorAll('.photo img').forEach(img => {
+    const miss = () => img.parentElement.classList.add('missing');
+    img.addEventListener('error', miss);
+    if (img.complete && img.naturalWidth === 0) miss();
+  });
+
+  // Mood quiz: result card and accent color change with the choice
+  const moods = {
+    cosmic: ['🌌', 'Dreamy stargazer. Make something beautiful and give it room to shine.', '#a98aff'],
+    soft: ['☁️', 'Soft and cozy. A little progress is still progress.', '#9fc8ff'],
+    sparkly: ['✨', 'Bright and playful. Add one delightful detail to your next project.', '#ffd9a0'],
+    creative: ['🧑‍💻', 'Creative coder. Build it, test it, record it, and share your process.', '#8ff0c4']
+  };
+  document.querySelectorAll('[data-mood]').forEach(b => b.addEventListener('click', () => {
+    const [e, t, c] = moods[b.dataset.mood];
+    document.querySelectorAll('[data-mood]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    document.documentElement.style.setProperty('--mood', c);
+    document.getElementById('r-emoji').textContent = e;
+    document.getElementById('r-text').textContent = t;
+  }));
+</script>
+</body>
+</html>
