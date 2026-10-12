@@ -21,7 +21,7 @@ JD: A Little Universe is an interactive fan-made website inspired by Joong Arche
 
 ## 🚀 Live Demo
 
-[Visit JD: A Little Universe](https://YOUR-USERNAME.github.io/jd-a-little-universe/)
+[Visit JD: A Little Universe](https://ekta918.github.io/JD-a-little-universe/)
 
 *Replace `YOUR-USERNAME` with your GitHub username.*
 
